@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: CIP Model Tracker
+  profiles:
+    active: dev

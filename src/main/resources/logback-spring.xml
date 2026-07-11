@@ -1,0 +1,80 @@
+<configuration>
+
+	<property name="LOGDIR" value="${catalina.base}/logs" />
+	
+	<appender name="FILE-ROLLING" 
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOGDIR}/modeltracker.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOGDIR}/modeltracker.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!-- or whenever the file size reaches 50MB -->
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}
+				[%file:%line] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}
+				[%file:%line] %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+    <appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
+        <smtpHost>mail.rmpuhn.ca</smtpHost>
+        <!-- one or more recipients are possible -->
+        <to>kevin.wang@rmp.uhn.ca</to>
+        <from>noreply@modeltracker.rmpuhn.ca</from>
+        <subject>ModelTracker [QA] Application Error</subject>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </layout>
+    </appender>
+    
+    <springProfile name="dev">
+
+		<logger name="ca.uhn.cip.modeltracker" level="INFO" additivity="false">
+        	<appender-ref ref="STDOUT"/>
+    	</logger>
+		
+	</springProfile>
+
+    <springProfile name="newint | int">
+
+		<logger name="ca.uhn.cip.modeltracker" level="INFO" additivity="false">
+        	<appender-ref ref="FILE-ROLLING"/>
+    	</logger>
+		
+	</springProfile>
+	
+    <springProfile name="newqa | prod | qa">
+        
+        <root level="ERROR">
+        	<appender-ref ref="EMAIL"/>
+    	</root>
+    	
+		<logger name="ca.uhn.cip.modeltracker" level="INFO" additivity="false">
+        	<appender-ref ref="FILE-ROLLING"/>
+    	</logger>
+    
+	</springProfile>
+	
+</configuration>
