@@ -52,7 +52,7 @@ import ca.uhn.cip.modeltracker.service.BioSampleService;
  *
  */
 
-@CrossOrigin(origins = "http://localhost:4200") // whatever the front end is running on
+@CrossOrigin(origins = "http://localhost:5173") // whatever the front end is running on
 @RestController
 @RequestMapping("/api")
 public class ModelController {
