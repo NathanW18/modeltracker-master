@@ -47,8 +47,7 @@ import ca.uhn.cip.modeltracker.service.BioSampleService;
 
 /**
  * Spring boot controller class for biosample.
- * 
- * @author Kevin Wang
+ * * @author Kevin Wang
  *
  */
 
@@ -219,19 +218,24 @@ public class ModelController {
             @RequestBody Model model,
             UriComponentsBuilder ucBuilder) {
 
-        logger.debug("Updating model " + model.getModelDisplayName());
+        // Safely evaluate to avoid a NullPointerException on model logging
+        String displayLogName = (model != null && model.getModelDisplayName() != null) 
+                                ? model.getModelDisplayName() 
+                                : modelDisplayName;
+
+        logger.debug("Updating model " + displayLogName);
 
         Model retModel = biosampleService.updateModelByModelDisplayName(modelDisplayName, model);
 
         if (retModel == null) {
-        	logger.debug("Error Updating model " + model.getModelDisplayName());
+        	logger.debug("Error Updating model " + displayLogName);
             return new ResponseEntity<Model>(HttpStatus.NOT_FOUND);
         }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(ucBuilder.path("/models/{id}/{studyname}").buildAndExpand(retModel.getModelIdentifier(), retModel.getStudyShortName()).toUri());
 
-        return new ResponseEntity<Model>(retModel, HttpStatus.CREATED);
+        return new ResponseEntity<Model>(retModel, HttpStatus.OK);
     }
 
     // ------------------- Delete a Model -----------------------------------------------
